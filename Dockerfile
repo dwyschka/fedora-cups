@@ -1,10 +1,11 @@
 FROM fedora:31
 MAINTAINER "Daniel Wyschka" <d.wyschka@sensou.de>
 ENV container docker
-RUN yum install -y redhat-rpm-config gcc unzip cups avahi avahi-tools python2 wget; \
+RUN yum install -y redhat-rpm-config gcc unzip cups avahi avahi-tools python2 wget nss-mdns; \
     yum install -y cups-libs.i686 libstdc++ libstdc++.i686 cups-libs cups-libs.i686 python2-devel cups-devel; \
     yum clean all; 
 RUN sed -i 's/localhost\:631/0.0.0.0\:631/g' /etc/cups/cupsd.conf;
+RUN sed -i 's/#enable-dbus=yes/enable-dbus=no/g' /etc/avahi/avahi-daemon.conf
 RUN cd /tmp; \
     curl http://download.support.xerox.com/pub/drivers/6000/drivers/linux/en_GB/6000_6010_rpm_1.01_20110222.zip --output driver.zip; \
     unzip driver.zip; \
@@ -14,9 +15,11 @@ RUN cd /tmp; \
 RUN cd /tmp; \
     pip2 install pycups; \
     mv /usr/bin/python2 /usr/bin/python; \
-    wget -O /usr/local/bin/airprint-generate.py --no-check-certificate https://raw.github.com/jpawlowski/airprint-generate/master/airprint-generate.py; \
-    wget -O /usr/local/bin/avahisearch.py --no-check-certificate https://raw.github.com/jpawlowski/airprint-generate/master/avahisearch.py; \
-    chmod 755 /usr/local/bin/airprint-generate.py /usr/local/bin/avahisearch.py; 
+    wget -O /usr/local/bin/airprint-generate.py --no-check-certificate https://raw.githubusercontent.com/tjfontaine/airprint-generate/master/airprint-generate.py; \
+    chmod 755 /usr/local/bin/airprint-generate.py; 
+
+
+VOLUME /etc/cups
 
 COPY ./entry.sh /usr/entry.sh
 RUN chmod +x /usr/entry.sh 
